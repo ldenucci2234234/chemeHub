@@ -7,22 +7,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #081c15;
-    --bg2: #0b2b21;
-    --bg3: #12372a;
-    --border: #1f4d3a;
-
-    --accent: #00ff9d;
-    --accent2: #00d9ff;
-    --accent3: #7cffcb;
-
-    --text: #f4fff9;
-    --text2: #b6d8c8;
-    --text3: #72917f;
-
-    --card: #0f241c;
-    --input-bg: #091913
-  
+    --bg: #0e0f0e;
+    --bg2: #161714;
+    --bg3: #1e1f1c;
+    --border: #2a2b27;
+    --accent: #c8f04a;
+    --accent2: #7fffc4;
+    --accent3: #ff6b35;
+    --text: #f0f0eb;
+    --text2: #9a9b94;
+    --text3: #5a5b55;
+    --card: #181917;
+    --input-bg: #111210;
     --radius: 10px;
     --font-display: 'Syne', sans-serif;
     --font-body: 'DM Sans', sans-serif;
@@ -260,6 +256,30 @@
   .result-label { font-family: var(--font-mono); font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; }
   .result-value { font-family: var(--font-mono); font-size: 22px; font-weight: 500; color: var(--accent); letter-spacing: -0.5px; }
   .result-unit { font-size: 13px; color: var(--text2); margin-left: 4px; }
+
+  .equation {
+    text-align: center;
+    font-size: 22px;
+    font-family: "Times New Roman", Georgia, serif;
+    color: var(--accent);
+    margin: 0 0 15px;
+    padding: 10px 12px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    line-height: 1.35;
+  }
+
+  .equation small {
+    display: block;
+    margin-top: 4px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
   .result-formula { margin-top: 8px; font-size: 11px; color: var(--text3); font-family: var(--font-mono); border-top: 1px solid var(--border); padding-top: 8px; }
 
   .section-label { font-family: var(--font-mono); font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
@@ -316,31 +336,31 @@
     <div class="section-label">Heat Transfer Calculators</div>
     <div class="calc-grid">
       <div class="calc-card">
-        <div class="calc-header"><div><div class="calc-icon icon-green">🔥</div><div class="calc-name">Heat Transfer</div><div class="calc-desc">Calculate the heat transfer for a temperature change</div></div></div>
-        <div class="equation">Q = mC<sub>p</sub>ΔT
-</div>
+        <div class="calc-header"><div><div class="calc-icon icon-green">🔥</div><div class="calc-name">Sensible Heat</div><div class="calc-desc">Calculate heat transfer for a temperature change.</div></div></div>
         <div class="calc-body">
-          <div class="field-row"><div class="field"><label>Mass (kg)</label><input type="number" id="ht1-m" placeholder="5.0" step="any"></div><div class="field"><label>Cp (J/kg·K)</label><input type="number" id="ht1-cp" placeholder="4184" step="any"></div></div>
-          <div class="field-row"><div class="field"><label>T_in (°C)</label><input type="number" id="ht1-t1" placeholder="20" step="any"></div><div class="field"><label>T_out (°C)</label><input type="number" id="ht1-t2" placeholder="80" step="any"></div></div>
+          <div class="equation">Q = mC<sub>p</sub>ΔT</div>
+          <div class="field-row"><div class="field"><label>m (kg)</label><input type="number" id="ht1-m" placeholder="5.0" step="any"></div><div class="field"><label>C<sub>p</sub> (J/kg·K)</label><input type="number" id="ht1-cp" placeholder="4184" step="any"></div></div>
+          <div class="field-row"><div class="field"><label>T<sub>in</sub> (°C)</label><input type="number" id="ht1-t1" placeholder="20" step="any"></div><div class="field"><label>T<sub>out</sub> (°C)</label><input type="number" id="ht1-t2" placeholder="80" step="any"></div></div>
           <button class="calc-btn" onclick="calcSensibleHeat()">Calculate Q</button><div class="result-box" id="ht1-result"><div class="result-label">Heat Transfer Q</div><div><span class="result-value" id="ht1-val">—</span><span class="result-unit">J</span></div><div class="result-formula" id="ht1-formula"></div></div>
         </div>
       </div>
       <div class="calc-card">
         <div class="calc-header"><div><div class="calc-icon icon-teal">♨</div><div class="calc-name">LMTD Calculator</div><div class="calc-desc">Log mean temperature difference for heat exchangers</div></div></div>
         <div class="calc-body">
+          <div class="equation">ΔT<sub>lm</sub> = (ΔT<sub>1</sub> − ΔT<sub>2</sub>) / ln(ΔT<sub>1</sub>/ΔT<sub>2</sub>)</div>
           <div class="field-row full"><div class="field"><label>Flow Configuration</label><select id="lmtd-type"><option value="counter">Counter-current</option><option value="parallel">Parallel</option></select></div></div>
-          <div class="field-row"><div class="field"><label>T_hot,in (°C)</label><input type="number" id="lmtd-th1" placeholder="120" step="any"></div><div class="field"><label>T_hot,out (°C)</label><input type="number" id="lmtd-th2" placeholder="60" step="any"></div></div>
-          <div class="field-row"><div class="field"><label>T_cold,in (°C)</label><input type="number" id="lmtd-tc1" placeholder="20" step="any"></div><div class="field"><label>T_cold,out (°C)</label><input type="number" id="lmtd-tc2" placeholder="50" step="any"></div></div>
+          <div class="field-row"><div class="field"><label>T<sub>h,in</sub> (°C)</label><input type="number" id="lmtd-th1" placeholder="120" step="any"></div><div class="field"><label>T<sub>h,out</sub> (°C)</label><input type="number" id="lmtd-th2" placeholder="60" step="any"></div></div>
+          <div class="field-row"><div class="field"><label>T<sub>c,in</sub> (°C)</label><input type="number" id="lmtd-tc1" placeholder="20" step="any"></div><div class="field"><label>T<sub>c,out</sub> (°C)</label><input type="number" id="lmtd-tc2" placeholder="50" step="any"></div></div>
           <button class="calc-btn" onclick="calcLMTD()">Calculate LMTD</button><div class="result-box" id="lmtd-result"><div class="result-label">Log Mean ΔT</div><div><span class="result-value" id="lmtd-val">—</span><span class="result-unit">°C</span></div><div class="result-formula" id="lmtd-formula"></div></div>
         </div>
       </div>
       <div class="calc-card">
         <div class="calc-header"><div><div class="calc-icon icon-orange">📐</div><div class="calc-name">Heat Exchanger Area</div><div class="calc-desc">Required area from duty, U, and LMTD</div></div></div>
-        <div class="calc-body"><div class="field-row three"><div class="field"><label>Q (W)</label><input type="number" id="hx-q" placeholder="50000" step="any"></div><div class="field"><label>U (W/m²·K)</label><input type="number" id="hx-u" placeholder="500" step="any"></div><div class="field"><label>LMTD (K)</label><input type="number" id="hx-lmtd" placeholder="35" step="any"></div></div><button class="calc-btn" onclick="calcHXArea()">Calculate Area</button><div class="result-box" id="hx-result"><div class="result-label">Required Area A</div><div><span class="result-value" id="hx-val">—</span><span class="result-unit">m²</span></div><div class="result-formula" id="hx-formula"></div></div></div>
+        <div class="calc-body"><div class="equation">A = Q / (UΔT<sub>lm</sub>)</div><div class="field-row three"><div class="field"><label>Q (W)</label><input type="number" id="hx-q" placeholder="50000" step="any"></div><div class="field"><label>U (W/m²·K)</label><input type="number" id="hx-u" placeholder="500" step="any"></div><div class="field"><label>ΔT<sub>lm</sub> (K)</label><input type="number" id="hx-lmtd" placeholder="35" step="any"></div></div><button class="calc-btn" onclick="calcHXArea()">Calculate Area</button><div class="result-box" id="hx-result"><div class="result-label">Required Area A</div><div><span class="result-value" id="hx-val">—</span><span class="result-unit">m²</span></div><div class="result-formula" id="hx-formula"></div></div></div>
       </div>
       <div class="calc-card">
         <div class="calc-header"><div><div class="calc-icon icon-blue">🧱</div><div class="calc-name">Fourier Conduction</div><div class="calc-desc">Steady-state heat transfer through a flat wall</div></div></div>
-        <div class="calc-body"><div class="field-row"><div class="field"><label>k (W/m·K)</label><input type="number" id="fc-k" placeholder="0.6" step="any"></div><div class="field"><label>Area (m²)</label><input type="number" id="fc-a" placeholder="1.0" step="any"></div></div><div class="field-row"><div class="field"><label>ΔT (K)</label><input type="number" id="fc-dt" placeholder="50" step="any"></div><div class="field"><label>Thickness (m)</label><input type="number" id="fc-l" placeholder="0.05" step="any"></div></div><button class="calc-btn" onclick="calcFourier()">Calculate q</button><div class="result-box" id="fc-result"><div class="result-label">Heat Transfer Rate q</div><div><span class="result-value" id="fc-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="fc-formula"></div></div></div>
+        <div class="calc-body"><div class="equation">q = kAΔT / L</div><div class="field-row"><div class="field"><label>k (W/m·K)</label><input type="number" id="fc-k" placeholder="0.6" step="any"></div><div class="field"><label>A (m²)</label><input type="number" id="fc-a" placeholder="1.0" step="any"></div></div><div class="field-row"><div class="field"><label>ΔT (K)</label><input type="number" id="fc-dt" placeholder="50" step="any"></div><div class="field"><label>L (m)</label><input type="number" id="fc-l" placeholder="0.05" step="any"></div></div><button class="calc-btn" onclick="calcFourier()">Calculate q</button><div class="result-box" id="fc-result"><div class="result-label">Heat Transfer Rate q</div><div><span class="result-value" id="fc-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="fc-formula"></div></div></div>
       </div>
     </div>
   </div>
@@ -348,32 +368,32 @@
   <div id="tab-mass" class="tab-panel">
     <div class="section-label">Mass &amp; Energy Balance Calculators</div>
     <div class="calc-grid">
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-green">⚖</div><div class="calc-name">Mass Balance</div><div class="calc-desc">Steady-state single-component balance</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>Feed (kg/s)</label><input type="number" id="mb-in" placeholder="10" step="any"></div><div class="field"><label>Product (kg/s)</label><input type="number" id="mb-out" placeholder="7.5" step="any"></div></div><button class="calc-btn" onclick="calcMassBalance()">Calculate Accumulation</button><div class="result-box" id="mb-result"><div class="result-label">Accumulation Rate</div><div><span class="result-value" id="mb-val">—</span><span class="result-unit">kg/s</span></div><div class="result-formula" id="mb-formula"></div></div></div></div>
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-blue">🧪</div><div class="calc-name">Mixing Concentration</div><div class="calc-desc">Outlet concentration for two streams</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>Flow 1</label><input type="number" id="mix-f1" placeholder="5" step="any"></div><div class="field"><label>Conc. 1</label><input type="number" id="mix-c1" placeholder="0.30" step="any"></div></div><div class="field-row"><div class="field"><label>Flow 2</label><input type="number" id="mix-f2" placeholder="3" step="any"></div><div class="field"><label>Conc. 2</label><input type="number" id="mix-c2" placeholder="0.10" step="any"></div></div><button class="calc-btn" onclick="calcMixing()">Calculate Outlet Conc.</button><div class="result-box" id="mix-result"><div class="result-label">Mixed Stream Concentration</div><div><span class="result-value" id="mix-val">—</span><span class="result-unit">fraction</span></div><div class="result-formula" id="mix-formula"></div></div></div></div>
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-purple">⚡</div><div class="calc-name">Open System Energy Balance</div><div class="calc-desc">Q = ṁCpΔT for steady flow</div></div></div><div class="calc-body"><div class="field-row three"><div class="field"><label>ṁ (kg/s)</label><input type="number" id="eb-m" placeholder="2.5" step="any"></div><div class="field"><label>Cp (J/kg·K)</label><input type="number" id="eb-cp" placeholder="4184" step="any"></div><div class="field"><label>ΔT (K)</label><input type="number" id="eb-dt" placeholder="30" step="any"></div></div><button class="calc-btn" onclick="calcEnergyBalance()">Calculate Q</button><div class="result-box" id="eb-result"><div class="result-label">Heat Duty Q</div><div><span class="result-value" id="eb-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="eb-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-green">⚖</div><div class="calc-name">Mass Balance</div><div class="calc-desc">Steady-state single-component balance</div></div></div><div class="calc-body"><div class="equation">Accumulation = ṁ<sub>in</sub> − ṁ<sub>out</sub></div><div class="field-row"><div class="field"><label>ṁ<sub>in</sub> (kg/s)</label><input type="number" id="mb-in" placeholder="10" step="any"></div><div class="field"><label>ṁ<sub>out</sub> (kg/s)</label><input type="number" id="mb-out" placeholder="7.5" step="any"></div></div><button class="calc-btn" onclick="calcMassBalance()">Calculate Accumulation</button><div class="result-box" id="mb-result"><div class="result-label">Accumulation Rate</div><div><span class="result-value" id="mb-val">—</span><span class="result-unit">kg/s</span></div><div class="result-formula" id="mb-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-blue">🧪</div><div class="calc-name">Mixing Concentration</div><div class="calc-desc">Outlet concentration for two streams</div></div></div><div class="calc-body"><div class="equation">C<sub>out</sub> = (F<sub>1</sub>C<sub>1</sub> + F<sub>2</sub>C<sub>2</sub>) / (F<sub>1</sub> + F<sub>2</sub>)</div><div class="field-row"><div class="field"><label>F<sub>1</sub></label><input type="number" id="mix-f1" placeholder="5" step="any"></div><div class="field"><label>C<sub>1</sub></label><input type="number" id="mix-c1" placeholder="0.30" step="any"></div></div><div class="field-row"><div class="field"><label>F<sub>2</sub></label><input type="number" id="mix-f2" placeholder="3" step="any"></div><div class="field"><label>C<sub>2</sub></label><input type="number" id="mix-c2" placeholder="0.10" step="any"></div></div><button class="calc-btn" onclick="calcMixing()">Calculate Outlet Conc.</button><div class="result-box" id="mix-result"><div class="result-label">Mixed Stream Concentration</div><div><span class="result-value" id="mix-val">—</span><span class="result-unit">fraction</span></div><div class="result-formula" id="mix-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-purple">⚡</div><div class="calc-name">Open System Energy Balance</div><div class="calc-desc">Q = ṁCpΔT for steady flow</div></div></div><div class="calc-body"><div class="equation">Q = ṁC<sub>p</sub>ΔT</div><div class="field-row three"><div class="field"><label>ṁ (kg/s)</label><input type="number" id="eb-m" placeholder="2.5" step="any"></div><div class="field"><label>C<sub>p</sub> (J/kg·K)</label><input type="number" id="eb-cp" placeholder="4184" step="any"></div><div class="field"><label>ΔT (K)</label><input type="number" id="eb-dt" placeholder="30" step="any"></div></div><button class="calc-btn" onclick="calcEnergyBalance()">Calculate Q</button><div class="result-box" id="eb-result"><div class="result-label">Heat Duty Q</div><div><span class="result-value" id="eb-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="eb-formula"></div></div></div></div>
     </div>
   </div>
 
   <div id="tab-fluid" class="tab-panel">
     <div class="section-label">Fluid Mechanics Calculators</div>
     <div class="calc-grid">
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-teal">🌊</div><div class="calc-name">Reynolds Number</div><div class="calc-desc">Determine laminar or turbulent flow</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>Density ρ (kg/m³)</label><input type="number" id="re-rho" placeholder="1000" step="any"></div><div class="field"><label>Velocity v (m/s)</label><input type="number" id="re-v" placeholder="2" step="any"></div></div><div class="field-row"><div class="field"><label>Diameter D (m)</label><input type="number" id="re-d" placeholder="0.05" step="any"></div><div class="field"><label>Viscosity μ (Pa·s)</label><input type="number" id="re-mu" placeholder="0.001" step="any"></div></div><button class="calc-btn" onclick="calcReynolds()">Calculate Re</button><div class="result-box" id="re-result"><div class="result-label">Reynolds Number</div><div><span class="result-value" id="re-val">—</span><span class="result-unit" id="re-regime"></span></div><div class="result-formula" id="re-formula"></div></div></div></div>
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-orange">📉</div><div class="calc-name">Darcy Pressure Drop</div><div class="calc-desc">ΔP = f(L/D)(ρv²/2)</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>f</label><input type="number" id="dp-f" placeholder="0.02" step="any"></div><div class="field"><label>L (m)</label><input type="number" id="dp-l" placeholder="10" step="any"></div></div><div class="field-row"><div class="field"><label>D (m)</label><input type="number" id="dp-d" placeholder="0.05" step="any"></div><div class="field"><label>ρ (kg/m³)</label><input type="number" id="dp-rho" placeholder="1000" step="any"></div></div><div class="field-row full"><div class="field"><label>v (m/s)</label><input type="number" id="dp-v" placeholder="2" step="any"></div></div><button class="calc-btn" onclick="calcPressureDrop()">Calculate ΔP</button><div class="result-box" id="dp-result"><div class="result-label">Pressure Drop</div><div><span class="result-value" id="dp-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="dp-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-teal">🌊</div><div class="calc-name">Reynolds Number</div><div class="calc-desc">Determine laminar or turbulent flow</div></div></div><div class="calc-body"><div class="equation">Re = ρvD / μ</div><div class="field-row"><div class="field"><label>ρ (kg/m³)</label><input type="number" id="re-rho" placeholder="1000" step="any"></div><div class="field"><label>v (m/s)</label><input type="number" id="re-v" placeholder="2" step="any"></div></div><div class="field-row"><div class="field"><label>D (m)</label><input type="number" id="re-d" placeholder="0.05" step="any"></div><div class="field"><label>μ (Pa·s)</label><input type="number" id="re-mu" placeholder="0.001" step="any"></div></div><button class="calc-btn" onclick="calcReynolds()">Calculate Re</button><div class="result-box" id="re-result"><div class="result-label">Reynolds Number</div><div><span class="result-value" id="re-val">—</span><span class="result-unit" id="re-regime"></span></div><div class="result-formula" id="re-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-orange">📉</div><div class="calc-name">Darcy Pressure Drop</div><div class="calc-desc">ΔP = f(L/D)(ρv²/2)</div></div></div><div class="calc-body"><div class="equation">ΔP = f(L/D)(ρv<sup>2</sup>/2)</div><div class="field-row"><div class="field"><label>f</label><input type="number" id="dp-f" placeholder="0.02" step="any"></div><div class="field"><label>L (m)</label><input type="number" id="dp-l" placeholder="10" step="any"></div></div><div class="field-row"><div class="field"><label>D (m)</label><input type="number" id="dp-d" placeholder="0.05" step="any"></div><div class="field"><label>ρ (kg/m³)</label><input type="number" id="dp-rho" placeholder="1000" step="any"></div></div><div class="field-row full"><div class="field"><label>v (m/s)</label><input type="number" id="dp-v" placeholder="2" step="any"></div></div><button class="calc-btn" onclick="calcPressureDrop()">Calculate ΔP</button><div class="result-box" id="dp-result"><div class="result-label">Pressure Drop</div><div><span class="result-value" id="dp-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="dp-formula"></div></div></div></div>
     </div>
   </div>
 
   <div id="tab-thermo" class="tab-panel">
     <div class="section-label">Thermodynamics Calculators</div>
     <div class="calc-grid">
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-green">💨</div><div class="calc-name">Ideal Gas Law</div><div class="calc-desc">Solve for pressure using P = nRT/V</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>n (mol)</label><input type="number" id="ig-n" placeholder="1" step="any"></div><div class="field"><label>T (K)</label><input type="number" id="ig-t" placeholder="298" step="any"></div></div><div class="field-row full"><div class="field"><label>V (m³)</label><input type="number" id="ig-v" placeholder="0.0245" step="any"></div></div><button class="calc-btn" onclick="calcIdealGas()">Calculate P</button><div class="result-box" id="ig-result"><div class="result-label">Pressure</div><div><span class="result-value" id="ig-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="ig-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-green">💨</div><div class="calc-name">Ideal Gas Law</div><div class="calc-desc">Solve for pressure using P = nRT/V</div></div></div><div class="calc-body"><div class="equation">P = nRT / V <small>R = 8.314 J/(mol·K)</small></div><div class="field-row"><div class="field"><label>n (mol)</label><input type="number" id="ig-n" placeholder="1" step="any"></div><div class="field"><label>T (K)</label><input type="number" id="ig-t" placeholder="298" step="any"></div></div><div class="field-row full"><div class="field"><label>V (m³)</label><input type="number" id="ig-v" placeholder="0.0245" step="any"></div></div><button class="calc-btn" onclick="calcIdealGas()">Calculate P</button><div class="result-box" id="ig-result"><div class="result-label">Pressure</div><div><span class="result-value" id="ig-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="ig-formula"></div></div></div></div>
     </div>
   </div>
 
   <div id="tab-rxn" class="tab-panel">
     <div class="section-label">Reaction Engineering Calculators</div>
     <div class="calc-grid">
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-orange">🔄</div><div class="calc-name">Reactor Conversion</div><div class="calc-desc">X = (F₀ - F) / F₀</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>F₀ (mol/s)</label><input type="number" id="conv-f0" placeholder="10" step="any"></div><div class="field"><label>F (mol/s)</label><input type="number" id="conv-f" placeholder="3" step="any"></div></div><button class="calc-btn" onclick="calcConversion()">Calculate X</button><div class="result-box" id="rxconv-result"><div class="result-label">Conversion</div><div><span class="result-value" id="rxconv-val">—</span><span class="result-unit">%</span></div><div class="result-formula" id="rxconv-formula"></div></div></div></div>
-      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-purple">📈</div><div class="calc-name">Arrhenius Rate Constant</div><div class="calc-desc">k₂ from k₁, Eₐ, T₁, and T₂</div></div></div><div class="calc-body"><div class="field-row"><div class="field"><label>k₁</label><input type="number" id="arr-k1" placeholder="0.01" step="any"></div><div class="field"><label>Eₐ (J/mol)</label><input type="number" id="arr-ea" placeholder="50000" step="any"></div></div><div class="field-row"><div class="field"><label>T₁ (K)</label><input type="number" id="arr-t1" placeholder="300" step="any"></div><div class="field"><label>T₂ (K)</label><input type="number" id="arr-t2" placeholder="330" step="any"></div></div><button class="calc-btn" onclick="calcArrhenius()">Calculate k₂</button><div class="result-box" id="arr-result"><div class="result-label">Rate Constant k₂</div><div><span class="result-value" id="arr-val">—</span><span class="result-unit">same units as k₁</span></div><div class="result-formula" id="arr-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-orange">🔄</div><div class="calc-name">Reactor Conversion</div><div class="calc-desc">X = (F₀ - F) / F₀</div></div></div><div class="calc-body"><div class="equation">X = (F<sub>A0</sub> − F<sub>A</sub>) / F<sub>A0</sub></div><div class="field-row"><div class="field"><label>F<sub>A0</sub> (mol/s)</label><input type="number" id="conv-f0" placeholder="10" step="any"></div><div class="field"><label>F<sub>A</sub> (mol/s)</label><input type="number" id="conv-f" placeholder="3" step="any"></div></div><button class="calc-btn" onclick="calcConversion()">Calculate X</button><div class="result-box" id="rxconv-result"><div class="result-label">Conversion</div><div><span class="result-value" id="rxconv-val">—</span><span class="result-unit">%</span></div><div class="result-formula" id="rxconv-formula"></div></div></div></div>
+      <div class="calc-card"><div class="calc-header"><div><div class="calc-icon icon-purple">📈</div><div class="calc-name">Arrhenius Rate Constant</div><div class="calc-desc">k₂ from k₁, Eₐ, T₁, and T₂</div></div></div><div class="calc-body"><div class="equation">k<sub>2</sub> = k<sub>1</sub>e<sup>−(E<sub>a</sub>/R)(1/T<sub>2</sub> − 1/T<sub>1</sub>)</sup></div><div class="field-row"><div class="field"><label>k<sub>1</sub></label><input type="number" id="arr-k1" placeholder="0.01" step="any"></div><div class="field"><label>E<sub>a</sub> (J/mol)</label><input type="number" id="arr-ea" placeholder="50000" step="any"></div></div><div class="field-row"><div class="field"><label>T<sub>1</sub> (K)</label><input type="number" id="arr-t1" placeholder="300" step="any"></div><div class="field"><label>T<sub>2</sub> (K)</label><input type="number" id="arr-t2" placeholder="330" step="any"></div></div><button class="calc-btn" onclick="calcArrhenius()">Calculate k₂</button><div class="result-box" id="arr-result"><div class="result-label">Rate Constant k₂</div><div><span class="result-value" id="arr-val">—</span><span class="result-unit">same units as k₁</span></div><div class="result-formula" id="arr-formula"></div></div></div></div>
     </div>
   </div>
 
