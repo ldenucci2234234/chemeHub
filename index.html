@@ -18,6 +18,7 @@
     --accent:#c8f04a;--accent2:#7fffc4;--accent3:#ff6b35;
     --text:#f0f0eb;--text2:#9a9b94;--text3:#5a5b55;
     --card:#181917;--input-bg:#111210;--radius:10px;
+    --error:#ff6b6b;
     --font-display:'Syne',sans-serif;--font-body:'DM Sans',sans-serif;--font-mono:'DM Mono',monospace;
   }
   *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -57,6 +58,7 @@
   .field input,.field select{background:var(--input-bg);border:1px solid var(--border);border-radius:7px;color:var(--text);font-family:var(--font-mono);font-size:13px;padding:8px 10px;width:100%;outline:none;transition:border-color .15s;appearance:none}
   .field input:focus,.field select:focus{border-color:rgba(200,240,74,.4)}
   .field input::placeholder{color:var(--text3)}
+  .field input.error{border-color:var(--error);}
   .field select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%235a5b55'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:26px}
   .calc-btn{width:100%;margin-top:14px;background:var(--accent);color:#0e0f0e;border:none;border-radius:8px;font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:.3px;padding:10px;cursor:pointer;transition:opacity .15s,transform .1s;text-transform:uppercase}
   .calc-btn:hover{opacity:.88}.calc-btn:active{transform:scale(.98)}
@@ -66,11 +68,20 @@
   .result-value{font-family:var(--font-mono);font-size:22px;font-weight:500;color:var(--accent);letter-spacing:-.5px}
   .result-unit{font-size:13px;color:var(--text2);margin-left:4px}
   .result-formula{margin-top:8px;font-size:11px;color:var(--text3);font-family:var(--font-mono);border-top:1px solid var(--border);padding-top:8px}
+  .error-msg{margin-top:8px;font-size:11px;color:var(--error);font-family:var(--font-mono);display:none}
+  .error-msg.show{display:block}
   .equation{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:56px;margin:0 0 16px;padding:14px 20px 12px;background:rgba(200,240,74,.04);border:1px solid rgba(200,240,74,.18);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;position:relative}
   .equation mjx-container{color:var(--text) !important}
   .equation mjx-container svg{color:var(--text)}
   .equation mjx-container svg *{fill:currentColor}
   .eq-note{margin-top:6px;font-family:var(--font-mono);font-size:10px;color:var(--text3);letter-spacing:.05em;text-transform:uppercase}
+  .about-toggle{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--text3);font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;padding:0;margin-bottom:0;transition:color .15s}
+  .about-toggle:hover{color:var(--text2)}
+  .about-toggle .chevron{transition:transform .2s;display:inline-block;font-size:9px}
+  .about-toggle.open .chevron{transform:rotate(90deg)}
+  .about-body{display:none;margin-top:10px;padding:10px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;font-size:12px;color:var(--text2);line-height:1.6}
+  .about-body.open{display:block}
+  .about-wrap{margin-bottom:14px;padding-top:2px}
   .section-label{font-family:var(--font-mono);font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px;display:flex;align-items:center;gap:10px}
   .section-label::after{content:'';flex:1;height:1px;background:var(--border)}
   .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
@@ -80,6 +91,12 @@
   .ref-row:last-child{border-bottom:none}
   .ref-sym{font-family:var(--font-mono);color:var(--accent2);flex-shrink:0}
   .ref-def{color:var(--text2);text-align:right}
+  .uc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+  .uc-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px}
+  .uc-title{font-family:var(--font-display);font-size:14px;font-weight:700;margin-bottom:14px;color:var(--text);letter-spacing:-.2px}
+  .uc-row{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end;margin-bottom:10px}
+  .uc-arrow{font-family:var(--font-mono);font-size:14px;color:var(--text3);padding-bottom:9px;text-align:center}
+  .uc-result-inline{font-family:var(--font-mono);font-size:13px;color:var(--accent);padding:8px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:7px;min-height:35px;display:flex;align-items:center}
   .page-footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);font-size:12px;color:var(--text3);font-family:var(--font-mono);display:flex;justify-content:space-between;align-items:center}
   @media(max-width:680px){header{padding:0 20px}.page-wrap{padding:28px 20px 60px}.calc-grid{grid-template-columns:1fr}.field-row{grid-template-columns:1fr}.field-row.three{grid-template-columns:1fr}.nav-links{display:none}}
 </style>
@@ -103,12 +120,14 @@
   </div>
 
   <div class="tab-bar" role="tablist">
-    <button class="tab-btn active" onclick="switchTab(event,'heat')" role="tab">Heat Transfer</button>
-    <button class="tab-btn" onclick="switchTab(event,'mass')" role="tab">Mass &amp; Energy Balance</button>
-    <button class="tab-btn" onclick="switchTab(event,'fluid')" role="tab">Fluid Mechanics</button>
-    <button class="tab-btn" onclick="switchTab(event,'thermo')" role="tab">Thermodynamics</button>
-    <button class="tab-btn" onclick="switchTab(event,'rxn')" role="tab">Reaction Engineering</button>
-    <button class="tab-btn" onclick="switchTab(event,'refs')" role="tab">Formula Reference</button>
+    <button class="tab-btn active" onclick="switchTab('heat',this)" role="tab">Heat Transfer</button>
+    <button class="tab-btn" onclick="switchTab('mass',this)" role="tab">Mass &amp; Energy Balance</button>
+    <button class="tab-btn" onclick="switchTab('fluid',this)" role="tab">Fluid Mechanics</button>
+    <button class="tab-btn" onclick="switchTab('thermo',this)" role="tab">Thermodynamics</button>
+    <button class="tab-btn" onclick="switchTab('rxn',this)" role="tab">Reaction Engineering</button>
+    <button class="tab-btn" onclick="switchTab('mt',this)" role="tab">Mass Transfer</button>
+    <button class="tab-btn" onclick="switchTab('units',this)" role="tab">Unit Converter</button>
+    <button class="tab-btn" onclick="switchTab('refs',this)" role="tab">Formula Reference</button>
   </div>
 
   <!-- HEAT TRANSFER -->
@@ -120,6 +139,10 @@
         <div class="calc-header"><div><div class="calc-icon icon-green">🔥</div><div class="calc-name">Sensible Heat</div><div class="calc-desc">Calculate heat transfer for a temperature change.</div></div></div>
         <div class="calc-body">
           <div class="equation">$$Q = m C_p \Delta T$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Sensible heat is the energy added or removed that causes a change in temperature without a phase change. $C_p$ is the specific heat capacity at constant pressure. For water, $C_p \approx 4184\ \text{J/kg·K}$.</div>
+          </div>
           <div class="field-row">
             <div class="field"><label>m (kg)</label><input type="number" id="ht1-m" placeholder="5.0" step="any"></div>
             <div class="field"><label>Cp (J/kg·K)</label><input type="number" id="ht1-cp" placeholder="4184" step="any"></div>
@@ -129,6 +152,7 @@
             <div class="field"><label>T_out (°C)</label><input type="number" id="ht1-t2" placeholder="80" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcSensibleHeat()">Calculate Q</button>
+          <div class="error-msg" id="ht1-err">Please fill in all fields with valid numbers.</div>
           <div class="result-box" id="ht1-result"><div class="result-label">Heat Transfer Q</div><div><span class="result-value" id="ht1-val">—</span><span class="result-unit">J</span></div><div class="result-formula" id="ht1-formula"></div></div>
         </div>
       </div>
@@ -137,6 +161,10 @@
         <div class="calc-header"><div><div class="calc-icon icon-teal">♨</div><div class="calc-name">LMTD Calculator</div><div class="calc-desc">Log mean temperature difference for heat exchangers</div></div></div>
         <div class="calc-body">
           <div class="equation">$$\Delta T_{lm} = \dfrac{\Delta T_1 - \Delta T_2}{\ln\!\left(\dfrac{\Delta T_1}{\Delta T_2}\right)}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The LMTD is the effective average driving force for heat transfer in a heat exchanger. For counter-current flow: $\Delta T_1 = T_{h,in} - T_{c,out}$ and $\Delta T_2 = T_{h,out} - T_{c,in}$. Counter-current always gives a larger LMTD than parallel flow for the same terminal temperatures.</div>
+          </div>
           <div class="field-row full"><div class="field"><label>Flow Configuration</label><select id="lmtd-type"><option value="counter">Counter-current</option><option value="parallel">Parallel</option></select></div></div>
           <div class="field-row">
             <div class="field"><label>T_h,in (°C)</label><input type="number" id="lmtd-th1" placeholder="120" step="any"></div>
@@ -147,6 +175,7 @@
             <div class="field"><label>T_c,out (°C)</label><input type="number" id="lmtd-tc2" placeholder="50" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcLMTD()">Calculate LMTD</button>
+          <div class="error-msg" id="lmtd-err">Temperature differences must be positive and all fields must be filled.</div>
           <div class="result-box" id="lmtd-result"><div class="result-label">Log Mean ΔT</div><div><span class="result-value" id="lmtd-val">—</span><span class="result-unit">°C</span></div><div class="result-formula" id="lmtd-formula"></div></div>
         </div>
       </div>
@@ -155,12 +184,17 @@
         <div class="calc-header"><div><div class="calc-icon icon-orange">📐</div><div class="calc-name">Heat Exchanger Area</div><div class="calc-desc">Required area from duty, U, and LMTD</div></div></div>
         <div class="calc-body">
           <div class="equation">$$A = \dfrac{Q}{U \,\Delta T_{lm}}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">$U$ is the overall heat transfer coefficient accounting for all resistances in series (fouling, wall conduction, convection on both sides). Typical values: shell-and-tube liquid–liquid $U \approx 300{-}1000\ \text{W/m}^2\text{K}$, gas–gas $U \approx 10{-}50\ \text{W/m}^2\text{K}$.</div>
+          </div>
           <div class="field-row three">
             <div class="field"><label>Q (W)</label><input type="number" id="hx-q" placeholder="50000" step="any"></div>
             <div class="field"><label>U (W/m²·K)</label><input type="number" id="hx-u" placeholder="500" step="any"></div>
             <div class="field"><label>ΔT_lm (K)</label><input type="number" id="hx-lmtd" placeholder="35" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcHXArea()">Calculate Area</button>
+          <div class="error-msg" id="hx-err">All fields required; U and ΔTlm must be nonzero.</div>
           <div class="result-box" id="hx-result"><div class="result-label">Required Area A</div><div><span class="result-value" id="hx-val">—</span><span class="result-unit">m²</span></div><div class="result-formula" id="hx-formula"></div></div>
         </div>
       </div>
@@ -169,6 +203,10 @@
         <div class="calc-header"><div><div class="calc-icon icon-blue">🧱</div><div class="calc-name">Fourier Conduction</div><div class="calc-desc">Steady-state heat transfer through a flat wall</div></div></div>
         <div class="calc-body">
           <div class="equation">$$q = \dfrac{k A \,\Delta T}{L}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Fourier's law for steady-state 1D conduction through a slab. The thermal resistance is $R_{th} = L/(kA)$. For composite walls in series, resistances add: $R_{total} = \sum L_i/(k_i A)$.</div>
+          </div>
           <div class="field-row">
             <div class="field"><label>k (W/m·K)</label><input type="number" id="fc-k" placeholder="0.6" step="any"></div>
             <div class="field"><label>A (m²)</label><input type="number" id="fc-a" placeholder="1.0" step="any"></div>
@@ -178,7 +216,49 @@
             <div class="field"><label>L (m)</label><input type="number" id="fc-l" placeholder="0.05" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcFourier()">Calculate q</button>
+          <div class="error-msg" id="fc-err">All fields required; L must be nonzero.</div>
           <div class="result-box" id="fc-result"><div class="result-label">Heat Transfer Rate q</div><div><span class="result-value" id="fc-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="fc-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-purple">🌡</div><div class="calc-name">Convection (Newton's Law)</div><div class="calc-desc">Surface heat flux from h, area, and temperature difference</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$q = h A \left(T_s - T_\infty\right)$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Newton's law of cooling defines $h$, the convective heat transfer coefficient. $h$ is not a material property — it depends on geometry, flow conditions, and fluid properties. Typical ranges: free convection in air $h \approx 2{-}25\ \text{W/m}^2\text{K}$; forced liquid convection $h \approx 500{-}10{,}000\ \text{W/m}^2\text{K}$.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>h (W/m²·K)</label><input type="number" id="conv-h" placeholder="500" step="any"></div>
+            <div class="field"><label>A (m²)</label><input type="number" id="conv-a" placeholder="0.5" step="any"></div>
+            <div class="field"><label>T_s (°C)</label><input type="number" id="conv-ts" placeholder="80" step="any"></div>
+          </div>
+          <div class="field-row full">
+            <div class="field"><label>T_∞ (°C)</label><input type="number" id="conv-tinf" placeholder="25" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcConvection()">Calculate q</button>
+          <div class="error-msg" id="conv-err">Please fill in all fields with valid numbers.</div>
+          <div class="result-box" id="conv-result"><div class="result-label">Convective Heat Rate q</div><div><span class="result-value" id="conv-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="conv-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-teal">〰</div><div class="calc-name">Nusselt → h</div><div class="calc-desc">Convection coefficient from Nusselt number</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$h = \dfrac{Nu \cdot k}{L_c}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The Nusselt number $Nu = hL_c/k$ is the dimensionless heat transfer coefficient. Once $Nu$ is obtained from a correlation (e.g. Dittus-Boelter, Churchill-Bernstein), this rearrangement gives $h$. $L_c$ is the characteristic length: diameter for internal pipe flow, length for a flat plate.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>Nu</label><input type="number" id="nu-nu" placeholder="150" step="any"></div>
+            <div class="field"><label>k (W/m·K)</label><input type="number" id="nu-k" placeholder="0.6" step="any"></div>
+            <div class="field"><label>L_c (m)</label><input type="number" id="nu-lc" placeholder="0.05" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcNusselt()">Calculate h</button>
+          <div class="error-msg" id="nu-err">All fields required; L_c must be nonzero.</div>
+          <div class="result-box" id="nu-result"><div class="result-label">Heat Transfer Coefficient h</div><div><span class="result-value" id="nu-val">—</span><span class="result-unit">W/m²·K</span></div><div class="result-formula" id="nu-formula"></div></div>
         </div>
       </div>
 
@@ -193,12 +273,17 @@
       <div class="calc-card">
         <div class="calc-header"><div><div class="calc-icon icon-green">⚖</div><div class="calc-name">Mass Balance</div><div class="calc-desc">Steady-state single-component balance</div></div></div>
         <div class="calc-body">
-          <div class="equation">$$\text{Accum.} = \dot{m}_{in} - \dot{m}_{out}$$</div>
+          <div class="equation">$$\dot{m}_{accum} = \dot{m}_{in} - \dot{m}_{out}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">At steady state, accumulation = 0, so $\dot{m}_{in} = \dot{m}_{out}$. A nonzero result means the system mass is changing with time — valid for batch or transient problems.</div>
+          </div>
           <div class="field-row">
             <div class="field"><label>m_in (kg/s)</label><input type="number" id="mb-in" placeholder="10" step="any"></div>
             <div class="field"><label>m_out (kg/s)</label><input type="number" id="mb-out" placeholder="7.5" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcMassBalance()">Calculate Accumulation</button>
+          <div class="error-msg" id="mb-err">Please fill in all fields with valid numbers.</div>
           <div class="result-box" id="mb-result"><div class="result-label">Accumulation Rate</div><div><span class="result-value" id="mb-val">—</span><span class="result-unit">kg/s</span></div><div class="result-formula" id="mb-formula"></div></div>
         </div>
       </div>
@@ -207,8 +292,12 @@
         <div class="calc-header"><div><div class="calc-icon icon-blue">🧪</div><div class="calc-name">Mixing Concentration</div><div class="calc-desc">Outlet concentration for two streams</div></div></div>
         <div class="calc-body">
           <div class="equation">$$C_{out} = \dfrac{F_1 C_1 + F_2 C_2}{F_1 + F_2}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Component material balance on a mixing tee assuming complete mixing and no reaction. Extend to $n$ streams by summing numerator and denominator terms. $C$ can be any concentration unit as long as it's consistent across streams.</div>
+          </div>
           <div class="field-row">
-            <div class="field"><label>F₁</label><input type="number" id="mix-f1" placeholder="5" step="any"></div>
+            <div class="field"><label>F₁ (any flow unit)</label><input type="number" id="mix-f1" placeholder="5" step="any"></div>
             <div class="field"><label>C₁</label><input type="number" id="mix-c1" placeholder="0.30" step="any"></div>
           </div>
           <div class="field-row">
@@ -216,21 +305,27 @@
             <div class="field"><label>C₂</label><input type="number" id="mix-c2" placeholder="0.10" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcMixing()">Calculate Outlet Conc.</button>
+          <div class="error-msg" id="mix-err">All fields required; total flow must be nonzero.</div>
           <div class="result-box" id="mix-result"><div class="result-label">Mixed Stream Concentration</div><div><span class="result-value" id="mix-val">—</span><span class="result-unit">fraction</span></div><div class="result-formula" id="mix-formula"></div></div>
         </div>
       </div>
 
       <div class="calc-card">
-        <div class="calc-header"><div><div class="calc-icon icon-purple">⚡</div><div class="calc-name">Open System Energy Balance</div><div class="calc-desc">Q = ṁCpΔT for steady flow</div></div></div>
+        <div class="calc-header"><div><div class="calc-icon icon-purple">⚡</div><div class="calc-name">Open System Energy Balance</div><div class="calc-desc">Steady-flow heat duty</div></div></div>
         <div class="calc-body">
           <div class="equation">$$\dot{Q} = \dot{m}\, C_p\, \Delta T$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Simplified steady-state energy balance neglecting kinetic energy, potential energy, and shaft work. Valid for most heat exchanger and reactor sizing problems. For phase-change processes, include a latent heat term: $\dot{Q} = \dot{m}(C_p \Delta T + \Delta H_{vap})$.</div>
+          </div>
           <div class="field-row three">
             <div class="field"><label>ṁ (kg/s)</label><input type="number" id="eb-m" placeholder="2.5" step="any"></div>
             <div class="field"><label>Cp (J/kg·K)</label><input type="number" id="eb-cp" placeholder="4184" step="any"></div>
             <div class="field"><label>ΔT (K)</label><input type="number" id="eb-dt" placeholder="30" step="any"></div>
           </div>
-          <button class="calc-btn" onclick="calcEnergyBalance()">Calculate Q</button>
-          <div class="result-box" id="eb-result"><div class="result-label">Heat Duty Q</div><div><span class="result-value" id="eb-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="eb-formula"></div></div>
+          <button class="calc-btn" onclick="calcEnergyBalance()">Calculate Q̇</button>
+          <div class="error-msg" id="eb-err">Please fill in all fields with valid numbers.</div>
+          <div class="result-box" id="eb-result"><div class="result-label">Heat Duty Q̇</div><div><span class="result-value" id="eb-val">—</span><span class="result-unit">W</span></div><div class="result-formula" id="eb-formula"></div></div>
         </div>
       </div>
 
@@ -246,6 +341,10 @@
         <div class="calc-header"><div><div class="calc-icon icon-teal">🌊</div><div class="calc-name">Reynolds Number</div><div class="calc-desc">Determine laminar or turbulent flow</div></div></div>
         <div class="calc-body">
           <div class="equation">$$Re = \dfrac{\rho v D}{\mu}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">$Re$ is the ratio of inertial to viscous forces. For internal pipe flow: $Re < 2300$ laminar, $2300 < Re < 4000$ transitional, $Re > 4000$ turbulent. For a flat plate, the critical $Re \approx 5 \times 10^5$.</div>
+          </div>
           <div class="field-row">
             <div class="field"><label>ρ (kg/m³)</label><input type="number" id="re-rho" placeholder="1000" step="any"></div>
             <div class="field"><label>v (m/s)</label><input type="number" id="re-v" placeholder="2" step="any"></div>
@@ -255,16 +354,21 @@
             <div class="field"><label>μ (Pa·s)</label><input type="number" id="re-mu" placeholder="0.001" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcReynolds()">Calculate Re</button>
+          <div class="error-msg" id="re-err">All fields required; μ must be nonzero.</div>
           <div class="result-box" id="re-result"><div class="result-label">Reynolds Number</div><div><span class="result-value" id="re-val">—</span><span class="result-unit" id="re-regime"></span></div><div class="result-formula" id="re-formula"></div></div>
         </div>
       </div>
 
       <div class="calc-card">
-        <div class="calc-header"><div><div class="calc-icon icon-orange">📉</div><div class="calc-name">Darcy Pressure Drop</div><div class="calc-desc">ΔP = f(L/D)(ρv²/2)</div></div></div>
+        <div class="calc-header"><div><div class="calc-icon icon-orange">📉</div><div class="calc-name">Darcy–Weisbach ΔP</div><div class="calc-desc">Frictional pressure drop in a pipe</div></div></div>
         <div class="calc-body">
-          <div class="equation">$$\Delta P = f\,\dfrac{L}{D}\,\dfrac{\rho v^2}{2}$$</div>
+          <div class="equation">$$\Delta P = f_D\,\dfrac{L}{D}\,\dfrac{\rho v^2}{2}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">$f_D$ is the Darcy friction factor. For laminar flow ($Re < 2300$): $f_D = 64/Re$. For turbulent flow, use the Colebrook or Swamee-Jain equation (see Friction Factor calculator). Note: some texts use the Fanning friction factor $f = f_D/4$.</div>
+          </div>
           <div class="field-row">
-            <div class="field"><label>f</label><input type="number" id="dp-f" placeholder="0.02" step="any"></div>
+            <div class="field"><label>f_D (Darcy)</label><input type="number" id="dp-f" placeholder="0.02" step="any"></div>
             <div class="field"><label>L (m)</label><input type="number" id="dp-l" placeholder="10" step="any"></div>
           </div>
           <div class="field-row">
@@ -275,7 +379,29 @@
             <div class="field"><label>v (m/s)</label><input type="number" id="dp-v" placeholder="2" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcPressureDrop()">Calculate ΔP</button>
-          <div class="result-box" id="dp-result"><div class="result-label">Pressure Drop</div><div><span class="result-value" id="dp-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="dp-formula"></div></div>
+          <div class="error-msg" id="dp-err">All fields required; D must be nonzero.</div>
+          <div class="result-box" id="dp-result"><div class="result-label">Pressure Drop ΔP</div><div><span class="result-value" id="dp-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="dp-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-blue">🔩</div><div class="calc-name">Friction Factor (Swamee-Jain)</div><div class="calc-desc">Explicit approximation of Colebrook equation</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$f_D = \dfrac{0.25}{\left[\log_{10}\!\left(\dfrac{\varepsilon/D}{3.7} + \dfrac{5.74}{Re^{0.9}}\right)\right]^2}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The Swamee-Jain equation is an explicit approximation of the implicit Colebrook equation, accurate to within ~3% for $10^{-6} \le \varepsilon/D \le 10^{-2}$ and $5000 \le Re \le 10^8$. For laminar flow ($Re < 2300$), use $f_D = 64/Re$ instead.</div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>Re</label><input type="number" id="ff-re" placeholder="100000" step="any"></div>
+            <div class="field"><label>ε (m, roughness)</label><input type="number" id="ff-eps" placeholder="0.000046" step="any"></div>
+          </div>
+          <div class="field-row full">
+            <div class="field"><label>D (m)</label><input type="number" id="ff-d" placeholder="0.05" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcFrictionFactor()">Calculate f_D</button>
+          <div class="error-msg" id="ff-err">All fields required; D must be nonzero.</div>
+          <div class="result-box" id="ff-result"><div class="result-label">Darcy Friction Factor f_D</div><div><span class="result-value" id="ff-val">—</span><span class="result-unit"></span></div><div class="result-formula" id="ff-formula"></div></div>
         </div>
       </div>
 
@@ -288,11 +414,15 @@
     <div class="calc-grid">
 
       <div class="calc-card">
-        <div class="calc-header"><div><div class="calc-icon icon-green">💨</div><div class="calc-name">Ideal Gas Law</div><div class="calc-desc">Solve for pressure using P = nRT/V</div></div></div>
+        <div class="calc-header"><div><div class="calc-icon icon-green">💨</div><div class="calc-name">Ideal Gas Law</div><div class="calc-desc">Solve for pressure using PV = nRT</div></div></div>
         <div class="calc-body">
           <div class="equation">
             $$P = \dfrac{nRT}{V}$$
             <span class="eq-note">R = 8.314 J mol⁻¹ K⁻¹</span>
+          </div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Valid for ideal gases at low pressure and high temperature relative to the critical point. For non-ideal behavior, apply a compressibility factor $Z$: $PV = ZnRT$. Common $Z$ correlations: Pitzer, van der Waals, Peng-Robinson.</div>
           </div>
           <div class="field-row">
             <div class="field"><label>n (mol)</label><input type="number" id="ig-n" placeholder="1" step="any"></div>
@@ -302,7 +432,30 @@
             <div class="field"><label>V (m³)</label><input type="number" id="ig-v" placeholder="0.0245" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcIdealGas()">Calculate P</button>
+          <div class="error-msg" id="ig-err">All fields required; V must be nonzero.</div>
           <div class="result-box" id="ig-result"><div class="result-label">Pressure</div><div><span class="result-value" id="ig-val">—</span><span class="result-unit">Pa</span></div><div class="result-formula" id="ig-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-orange">🫧</div><div class="calc-name">Antoine Vapor Pressure</div><div class="calc-desc">Saturation pressure from temperature</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$\log_{10} P^{sat} = A - \dfrac{B}{C + T}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The Antoine equation correlates vapor pressure with temperature using three empirical constants (A, B, C). Constants are species- and unit-specific — always verify the units (T in °C or K, $P^{sat}$ in mmHg, bar, or kPa). Default values below are for water with T in °C and $P^{sat}$ in mmHg (valid 60–150 °C).</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>A</label><input type="number" id="ant-a" placeholder="8.07131" step="any"></div>
+            <div class="field"><label>B</label><input type="number" id="ant-b" placeholder="1730.63" step="any"></div>
+            <div class="field"><label>C</label><input type="number" id="ant-c" placeholder="233.426" step="any"></div>
+          </div>
+          <div class="field-row full">
+            <div class="field"><label>T (°C or K, match constants)</label><input type="number" id="ant-t" placeholder="100" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcAntoine()">Calculate P<sup>sat</sup></button>
+          <div class="error-msg" id="ant-err">All fields required.</div>
+          <div class="result-box" id="ant-result"><div class="result-label">Vapor Pressure P<sup>sat</sup></div><div><span class="result-value" id="ant-val">—</span><span class="result-unit">(units per constants)</span></div><div class="result-formula" id="ant-formula"></div></div>
         </div>
       </div>
 
@@ -315,15 +468,20 @@
     <div class="calc-grid">
 
       <div class="calc-card">
-        <div class="calc-header"><div><div class="calc-icon icon-orange">🔄</div><div class="calc-name">Reactor Conversion</div><div class="calc-desc">X = (F₀ - F) / F₀</div></div></div>
+        <div class="calc-header"><div><div class="calc-icon icon-orange">🔄</div><div class="calc-name">Reactor Conversion</div><div class="calc-desc">Fractional conversion from molar flow rates</div></div></div>
         <div class="calc-body">
           <div class="equation">$$X = \dfrac{F_{A0} - F_A}{F_{A0}}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Conversion $X$ is defined on the limiting reactant A. For a batch reactor, replace molar flow rates with moles: $X = (N_{A0} - N_A)/N_{A0}$. Conversion is always between 0 and 1.</div>
+          </div>
           <div class="field-row">
             <div class="field"><label>F_A0 (mol/s)</label><input type="number" id="conv-f0" placeholder="10" step="any"></div>
             <div class="field"><label>F_A (mol/s)</label><input type="number" id="conv-f" placeholder="3" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcConversion()">Calculate X</button>
-          <div class="result-box" id="rxconv-result"><div class="result-label">Conversion</div><div><span class="result-value" id="rxconv-val">—</span><span class="result-unit">%</span></div><div class="result-formula" id="rxconv-formula"></div></div>
+          <div class="error-msg" id="rxconv-err">All fields required; F_A0 must be nonzero.</div>
+          <div class="result-box" id="rxconv-result"><div class="result-label">Conversion X</div><div><span class="result-value" id="rxconv-val">—</span><span class="result-unit">%</span></div><div class="result-formula" id="rxconv-formula"></div></div>
         </div>
       </div>
 
@@ -331,6 +489,10 @@
         <div class="calc-header"><div><div class="calc-icon icon-purple">📈</div><div class="calc-name">Arrhenius Rate Constant</div><div class="calc-desc">k₂ from k₁, Eₐ, T₁, and T₂</div></div></div>
         <div class="calc-body">
           <div class="equation">$$k_2 = k_1 \exp\!\left[-\frac{E_a}{R}\!\left(\frac{1}{T_2} - \frac{1}{T_1}\right)\right]$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Derived from $k = A e^{-E_a/RT}$ by taking the ratio at two temperatures. $E_a$ is the activation energy (J/mol), $R = 8.314\ \text{J/mol·K}$. A 10 °C increase roughly doubles the rate constant for typical $E_a \approx 50{-}80\ \text{kJ/mol}$.</div>
+          </div>
           <div class="field-row">
             <div class="field"><label>k₁</label><input type="number" id="arr-k1" placeholder="0.01" step="any"></div>
             <div class="field"><label>Eₐ (J/mol)</label><input type="number" id="arr-ea" placeholder="50000" step="any"></div>
@@ -340,7 +502,248 @@
             <div class="field"><label>T₂ (K)</label><input type="number" id="arr-t2" placeholder="330" step="any"></div>
           </div>
           <button class="calc-btn" onclick="calcArrhenius()">Calculate k₂</button>
+          <div class="error-msg" id="arr-err">All fields required; T₁ and T₂ must be nonzero.</div>
           <div class="result-box" id="arr-result"><div class="result-label">Rate Constant k₂</div><div><span class="result-value" id="arr-val">—</span><span class="result-unit">same units as k₁</span></div><div class="result-formula" id="arr-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-green">🧫</div><div class="calc-name">CSTR Volume</div><div class="calc-desc">Required volume for a given conversion</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$V = \dfrac{F_{A0}\, X}{-r_A}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The CSTR (Continuous Stirred Tank Reactor) design equation assumes perfect mixing, so the exit conditions equal the interior conditions. The rate $-r_A$ is evaluated at the exit conversion $X$. For a first-order reaction: $-r_A = k C_{A0}(1-X)$.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>F_A0 (mol/s)</label><input type="number" id="cstr-fa0" placeholder="2" step="any"></div>
+            <div class="field"><label>X (0–1)</label><input type="number" id="cstr-x" placeholder="0.8" step="any" min="0" max="1"></div>
+            <div class="field"><label>-r_A (mol/m³·s)</label><input type="number" id="cstr-ra" placeholder="0.05" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcCSTR()">Calculate V</button>
+          <div class="error-msg" id="cstr-err">All fields required; -r_A must be nonzero and X between 0–1.</div>
+          <div class="result-box" id="cstr-result"><div class="result-label">Reactor Volume V</div><div><span class="result-value" id="cstr-val">—</span><span class="result-unit">m³</span></div><div class="result-formula" id="cstr-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-teal">🔬</div><div class="calc-name">PFR Volume</div><div class="calc-desc">Levenspiel integral for first-order reaction</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$V = \dfrac{F_{A0}}{k\, C_{A0}} \ln\!\left(\dfrac{1}{1-X}\right)$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The PFR (Plug Flow Reactor) design equation $V = F_{A0}\int_0^X dX/(-r_A)$ integrated for an irreversible first-order liquid-phase reaction where $-r_A = k C_{A0}(1-X)$. PFR always outperforms a single CSTR for positive-order reactions.</div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>F_A0 (mol/s)</label><input type="number" id="pfr-fa0" placeholder="2" step="any"></div>
+            <div class="field"><label>k (s⁻¹)</label><input type="number" id="pfr-k" placeholder="0.1" step="any"></div>
+          </div>
+          <div class="field-row">
+            <div class="field"><label>C_A0 (mol/m³)</label><input type="number" id="pfr-ca0" placeholder="100" step="any"></div>
+            <div class="field"><label>X (0–1)</label><input type="number" id="pfr-x" placeholder="0.8" step="any" min="0" max="1"></div>
+          </div>
+          <button class="calc-btn" onclick="calcPFR()">Calculate V</button>
+          <div class="error-msg" id="pfr-err">All fields required; k, C_A0 must be nonzero and X between 0–0.9999.</div>
+          <div class="result-box" id="pfr-result"><div class="result-label">Reactor Volume V</div><div><span class="result-value" id="pfr-val">—</span><span class="result-unit">m³</span></div><div class="result-formula" id="pfr-formula"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- MASS TRANSFER -->
+  <div id="tab-mt" class="tab-panel">
+    <div class="section-label">Mass Transfer Calculators</div>
+    <div class="calc-grid">
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-blue">💧</div><div class="calc-name">Fick's Law (Diffusion Flux)</div><div class="calc-desc">Molar flux from concentration gradient</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$J_A = -D_{AB}\,\dfrac{dC_A}{dz}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Fick's first law for steady-state equimolar counter-diffusion. For a finite slab: $J_A = D_{AB}(C_{A1} - C_{A2})/\Delta z$. $D_{AB}$ is the binary diffusion coefficient (m²/s); typical values in gases $\sim 10^{-5}\ \text{m}^2/\text{s}$, in liquids $\sim 10^{-9}\ \text{m}^2/\text{s}$.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>D_AB (m²/s)</label><input type="number" id="fick-d" placeholder="2.6e-5" step="any"></div>
+            <div class="field"><label>C_A1 (mol/m³)</label><input type="number" id="fick-ca1" placeholder="10" step="any"></div>
+            <div class="field"><label>C_A2 (mol/m³)</label><input type="number" id="fick-ca2" placeholder="2" step="any"></div>
+          </div>
+          <div class="field-row full">
+            <div class="field"><label>Δz (m)</label><input type="number" id="fick-dz" placeholder="0.01" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcFick()">Calculate J_A</button>
+          <div class="error-msg" id="fick-err">All fields required; Δz must be nonzero.</div>
+          <div class="result-box" id="fick-result"><div class="result-label">Molar Flux J_A</div><div><span class="result-value" id="fick-val">—</span><span class="result-unit">mol/m²·s</span></div><div class="result-formula" id="fick-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-green">🔀</div><div class="calc-name">Convective Mass Transfer</div><div class="calc-desc">Flux from mass transfer coefficient k_c</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$N_A = k_c \left(C_{A,s} - C_{A,\infty}\right)$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">Analogous to Newton's law of cooling. $k_c$ (m/s) is the convective mass transfer coefficient, obtained from Sherwood number correlations: $k_c = Sh \cdot D_{AB} / L_c$. The Chilton-Colburn analogy relates $k_c$ to $h$: $k_c = h/(\rho C_p \cdot Le^{2/3})$.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>k_c (m/s)</label><input type="number" id="kc-kc" placeholder="0.001" step="any"></div>
+            <div class="field"><label>C_A,s (mol/m³)</label><input type="number" id="kc-cas" placeholder="50" step="any"></div>
+            <div class="field"><label>C_A,∞ (mol/m³)</label><input type="number" id="kc-cainf" placeholder="5" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcConvMT()">Calculate N_A</button>
+          <div class="error-msg" id="kc-err">Please fill in all fields with valid numbers.</div>
+          <div class="result-box" id="kc-result"><div class="result-label">Molar Flux N_A</div><div><span class="result-value" id="kc-val">—</span><span class="result-unit">mol/m²·s</span></div><div class="result-formula" id="kc-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-purple">〽</div><div class="calc-name">Sherwood Number → k_c</div><div class="calc-desc">Mass transfer coefficient from Sh</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$k_c = \dfrac{Sh \cdot D_{AB}}{L_c}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The Sherwood number $Sh = k_c L_c / D_{AB}$ is the mass transfer analog of the Nusselt number. Common correlations: Dittus-Boelter analog $Sh = 0.023 Re^{0.8} Sc^{1/3}$ for turbulent pipe flow; $Sc = \mu/(\rho D_{AB})$ is the Schmidt number.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>Sh</label><input type="number" id="sh-sh" placeholder="120" step="any"></div>
+            <div class="field"><label>D_AB (m²/s)</label><input type="number" id="sh-dab" placeholder="2.6e-5" step="any"></div>
+            <div class="field"><label>L_c (m)</label><input type="number" id="sh-lc" placeholder="0.05" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcSherwood()">Calculate k_c</button>
+          <div class="error-msg" id="sh-err">All fields required; L_c must be nonzero.</div>
+          <div class="result-box" id="sh-result"><div class="result-label">Mass Transfer Coefficient k_c</div><div><span class="result-value" id="sh-val">—</span><span class="result-unit">m/s</span></div><div class="result-formula" id="sh-formula"></div></div>
+        </div>
+      </div>
+
+      <div class="calc-card">
+        <div class="calc-header"><div><div class="calc-icon icon-orange">📊</div><div class="calc-name">Schmidt Number</div><div class="calc-desc">Ratio of momentum to mass diffusivity</div></div></div>
+        <div class="calc-body">
+          <div class="equation">$$Sc = \dfrac{\mu}{\rho\, D_{AB}} = \dfrac{\nu}{D_{AB}}$$</div>
+          <div class="about-wrap">
+            <button class="about-toggle" onclick="toggleAbout(this)"><span class="chevron">▶</span> About this equation</button>
+            <div class="about-body">The Schmidt number characterizes the relative thickness of the momentum and concentration boundary layers. $Sc \ll 1$: diffusion dominates (liquid metals). $Sc \approx 1$: gases. $Sc \gg 1$: liquids. Appears in mass transfer correlations as the analog of Prandtl number in heat transfer.</div>
+          </div>
+          <div class="field-row three">
+            <div class="field"><label>μ (Pa·s)</label><input type="number" id="sc-mu" placeholder="0.001" step="any"></div>
+            <div class="field"><label>ρ (kg/m³)</label><input type="number" id="sc-rho" placeholder="1000" step="any"></div>
+            <div class="field"><label>D_AB (m²/s)</label><input type="number" id="sc-dab" placeholder="1e-9" step="any"></div>
+          </div>
+          <button class="calc-btn" onclick="calcSchmidt()">Calculate Sc</button>
+          <div class="error-msg" id="sc-err">All fields required; ρ and D_AB must be nonzero.</div>
+          <div class="result-box" id="sc-result"><div class="result-label">Schmidt Number Sc</div><div><span class="result-value" id="sc-val">—</span><span class="result-unit" id="sc-note"></span></div><div class="result-formula" id="sc-formula"></div></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- UNIT CONVERTER -->
+  <div id="tab-units" class="tab-panel">
+    <div class="section-label">Unit Converter</div>
+    <div class="uc-grid">
+
+      <div class="uc-card">
+        <div class="uc-title">🌡 Temperature</div>
+        <div class="uc-row">
+          <div class="field"><label>°C</label><input type="number" id="uc-tc" placeholder="100" step="any" oninput="ucTemp('c')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>°F</label><div class="uc-result-inline" id="uc-tf">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>°C</label><input type="number" id="uc-tc2" placeholder="100" step="any" oninput="ucTemp2('c')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>K</label><div class="uc-result-inline" id="uc-tk">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>°F</label><input type="number" id="uc-tf2" placeholder="212" step="any" oninput="ucTemp3('f')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>°C</label><div class="uc-result-inline" id="uc-tc3">—</div></div>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">⚡ Pressure</div>
+        <div class="uc-row">
+          <div class="field"><label>Pa</label><input type="number" id="uc-pa" placeholder="101325" step="any" oninput="ucPress('pa')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>atm</label><div class="uc-result-inline" id="uc-atm">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>Pa</label><input type="number" id="uc-pa2" placeholder="101325" step="any" oninput="ucPress2('pa')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>bar</label><div class="uc-result-inline" id="uc-bar">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>Pa</label><input type="number" id="uc-pa3" placeholder="101325" step="any" oninput="ucPress3('pa')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>psi</label><div class="uc-result-inline" id="uc-psi">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>Pa</label><input type="number" id="uc-pa4" placeholder="101325" step="any" oninput="ucPress4('pa')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>mmHg</label><div class="uc-result-inline" id="uc-mmhg">—</div></div>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">💧 Volumetric Flow</div>
+        <div class="uc-row">
+          <div class="field"><label>m³/s</label><input type="number" id="uc-m3s" placeholder="0.001" step="any" oninput="ucFlow('m3s')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>L/min</label><div class="uc-result-inline" id="uc-lpm">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>m³/s</label><input type="number" id="uc-m3s2" placeholder="0.001" step="any" oninput="ucFlow2('m3s')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>gal/min (US)</label><div class="uc-result-inline" id="uc-gpm">—</div></div>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">⚖ Mass &amp; Density</div>
+        <div class="uc-row">
+          <div class="field"><label>kg</label><input type="number" id="uc-kg" placeholder="1" step="any" oninput="ucMass('kg')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>lb</label><div class="uc-result-inline" id="uc-lb">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>kg/m³</label><input type="number" id="uc-kgm3" placeholder="1000" step="any" oninput="ucDens('kgm3')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>g/cm³</label><div class="uc-result-inline" id="uc-gcm3">—</div></div>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">⚡ Energy &amp; Power</div>
+        <div class="uc-row">
+          <div class="field"><label>J</label><input type="number" id="uc-j" placeholder="1000" step="any" oninput="ucEnergy('j')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>kJ</label><div class="uc-result-inline" id="uc-kj">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>J</label><input type="number" id="uc-j2" placeholder="1000" step="any" oninput="ucEnergy2('j')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>BTU</label><div class="uc-result-inline" id="uc-btu">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>W</label><input type="number" id="uc-w" placeholder="1000" step="any" oninput="ucPower('w')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>BTU/hr</label><div class="uc-result-inline" id="uc-btuh">—</div></div>
+        </div>
+      </div>
+
+      <div class="uc-card">
+        <div class="uc-title">📐 Viscosity</div>
+        <div class="uc-row">
+          <div class="field"><label>Pa·s</label><input type="number" id="uc-pas" placeholder="0.001" step="any" oninput="ucVisc('pas')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>cP</label><div class="uc-result-inline" id="uc-cp">—</div></div>
+        </div>
+        <div class="uc-row">
+          <div class="field"><label>Pa·s</label><input type="number" id="uc-pas2" placeholder="0.001" step="any" oninput="ucVisc2('pas')"></div>
+          <div class="uc-arrow">→</div>
+          <div class="field"><label>lb/(ft·s)</label><div class="uc-result-inline" id="uc-lbfts">—</div></div>
         </div>
       </div>
 
@@ -352,115 +755,292 @@
     <div class="section-label">Formula Reference</div>
     <div class="ref-grid">
       <div class="ref-card"><h3>Heat Transfer</h3>
-        <div class="ref-row"><span class="ref-sym">Q = mcΔT</span><span class="ref-def">Sensible heat</span></div>
+        <div class="ref-row"><span class="ref-sym">Q = mCpΔT</span><span class="ref-def">Sensible heat</span></div>
         <div class="ref-row"><span class="ref-sym">Q = UAΔTlm</span><span class="ref-def">Heat exchanger duty</span></div>
-        <div class="ref-row"><span class="ref-sym">q = kAΔT/L</span><span class="ref-def">Conduction</span></div>
+        <div class="ref-row"><span class="ref-sym">q = kAΔT/L</span><span class="ref-def">Fourier conduction</span></div>
+        <div class="ref-row"><span class="ref-sym">q = hA(Ts−T∞)</span><span class="ref-def">Newton's law of cooling</span></div>
+        <div class="ref-row"><span class="ref-sym">h = Nu·k/Lc</span><span class="ref-def">Nusselt → h</span></div>
       </div>
-      <div class="ref-card"><h3>Fluids</h3>
+      <div class="ref-card"><h3>Fluid Mechanics</h3>
         <div class="ref-row"><span class="ref-sym">Re = ρvD/μ</span><span class="ref-def">Flow regime</span></div>
-        <div class="ref-row"><span class="ref-sym">ΔP = f(L/D)ρv²/2</span><span class="ref-def">Darcy-Weisbach</span></div>
+        <div class="ref-row"><span class="ref-sym">ΔP = fD(L/D)ρv²/2</span><span class="ref-def">Darcy-Weisbach</span></div>
+        <div class="ref-row"><span class="ref-sym">fD = 64/Re</span><span class="ref-def">Laminar friction factor</span></div>
+        <div class="ref-row"><span class="ref-sym">Swamee-Jain</span><span class="ref-def">Turbulent fD (explicit)</span></div>
       </div>
-      <div class="ref-card"><h3>Thermo / Kinetics</h3>
+      <div class="ref-card"><h3>Thermodynamics</h3>
         <div class="ref-row"><span class="ref-sym">PV = nRT</span><span class="ref-def">Ideal gas law</span></div>
-        <div class="ref-row"><span class="ref-sym">ln(k₂/k₁) = −Ea/R(1/T₂−1/T₁)</span><span class="ref-def">Arrhenius</span></div>
+        <div class="ref-row"><span class="ref-sym">log P* = A − B/(C+T)</span><span class="ref-def">Antoine equation</span></div>
+        <div class="ref-row"><span class="ref-sym">R = 8.314 J/mol·K</span><span class="ref-def">Gas constant</span></div>
+      </div>
+      <div class="ref-card"><h3>Reaction Engineering</h3>
+        <div class="ref-row"><span class="ref-sym">X = (FA0 − FA)/FA0</span><span class="ref-def">Conversion</span></div>
+        <div class="ref-row"><span class="ref-sym">V = FA0X/(−rA)</span><span class="ref-def">CSTR design equation</span></div>
+        <div class="ref-row"><span class="ref-sym">V = (FA0/kCA0)ln(1/(1−X))</span><span class="ref-def">PFR (1st order)</span></div>
+        <div class="ref-row"><span class="ref-sym">k₂ = k₁exp[−Ea/R(1/T₂−1/T₁)]</span><span class="ref-def">Arrhenius</span></div>
+      </div>
+      <div class="ref-card"><h3>Mass Transfer</h3>
+        <div class="ref-row"><span class="ref-sym">JA = −DAB(dCA/dz)</span><span class="ref-def">Fick's first law</span></div>
+        <div class="ref-row"><span class="ref-sym">NA = kc(CAs − CA∞)</span><span class="ref-def">Convective flux</span></div>
+        <div class="ref-row"><span class="ref-sym">kc = Sh·DAB/Lc</span><span class="ref-def">Sherwood → kc</span></div>
+        <div class="ref-row"><span class="ref-sym">Sc = μ/(ρDAB)</span><span class="ref-def">Schmidt number</span></div>
+      </div>
+      <div class="ref-card"><h3>Dimensionless Numbers</h3>
+        <div class="ref-row"><span class="ref-sym">Re = ρvL/μ</span><span class="ref-def">Reynolds</span></div>
+        <div class="ref-row"><span class="ref-sym">Nu = hL/k</span><span class="ref-def">Nusselt</span></div>
+        <div class="ref-row"><span class="ref-sym">Pr = μCp/k</span><span class="ref-def">Prandtl</span></div>
+        <div class="ref-row"><span class="ref-sym">Sh = kcL/DAB</span><span class="ref-def">Sherwood</span></div>
+        <div class="ref-row"><span class="ref-sym">Sc = μ/(ρDAB)</span><span class="ref-def">Schmidt</span></div>
+        <div class="ref-row"><span class="ref-sym">Le = Sc/Pr = α/DAB</span><span class="ref-def">Lewis</span></div>
       </div>
     </div>
   </div>
 
-  <div class="page-footer"><span>ChemE Hub v0.2</span><span>Built as a starter project</span></div>
+  <div class="page-footer"><span>ChemE Hub v0.3</span><span>Built by a ChemE student, for ChemE students</span></div>
 </div>
 
 <script>
-  function switchTab(event, tabName) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-    event.currentTarget.classList.add('active');
-    var panel = document.getElementById('tab-' + tabName);
-    panel.classList.add('active');
-    if (window.MathJax && MathJax.typesetPromise) {
-      MathJax.typesetPromise([panel]).catch(function(err){ console.log(err); });
-    }
+function switchTab(tabName, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  var panel = document.getElementById('tab-' + tabName);
+  panel.classList.add('active');
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([panel]).catch(function(e){ console.log(e); });
   }
-  function getNumber(id){ return parseFloat(document.getElementById(id).value); }
-  function invalid(vals){ return vals.some(function(v){ return Number.isNaN(v); }); }
-  function showResult(boxId, valueId, formulaId, value, formula){
-    document.getElementById(valueId).textContent = value;
-    document.getElementById(formulaId).textContent = formula;
-    document.getElementById(boxId).classList.add('show');
+}
+function toggleAbout(btn) {
+  var body = btn.nextElementSibling;
+  var open = body.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open && window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise([body]).catch(function(e){ console.log(e); });
   }
-  function showError(msg){ alert(msg || 'Please fill in all fields with valid numbers.'); }
-
-  function calcSensibleHeat(){
-    var m=getNumber('ht1-m'),cp=getNumber('ht1-cp'),t1=getNumber('ht1-t1'),t2=getNumber('ht1-t2');
-    if(invalid([m,cp,t1,t2]))return showError();
-    showResult('ht1-result','ht1-val','ht1-formula',(m*cp*(t2-t1)).toExponential(3),'Q = '+m+' × '+cp+' × ('+t2+' − '+t1+')');
+}
+function g(id){ return parseFloat(document.getElementById(id).value); }
+function bad(vals){ return vals.some(function(v){ return Number.isNaN(v); }); }
+function showErr(errId, inputIds) {
+  document.getElementById(errId).classList.add('show');
+  if (inputIds) inputIds.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el && isNaN(parseFloat(el.value))) el.classList.add('error');
+  });
+}
+function clearErr(errId, inputIds) {
+  document.getElementById(errId).classList.remove('show');
+  if (inputIds) inputIds.forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('error');
+  });
+}
+function showResult(boxId, valueId, formulaId, value, formula){
+  document.getElementById(valueId).textContent = value;
+  document.getElementById(formulaId).textContent = formula;
+  document.getElementById(boxId).classList.add('show');
+}
+function fmt(n){
+  if(Math.abs(n) >= 1e5 || (Math.abs(n) < 1e-3 && n !== 0)) return n.toExponential(4);
+  return parseFloat(n.toPrecision(6)).toString();
+}
+function calcSensibleHeat(){
+  var ids=['ht1-m','ht1-cp','ht1-t1','ht1-t2'];
+  var m=g('ht1-m'),cp=g('ht1-cp'),t1=g('ht1-t1'),t2=g('ht1-t2');
+  clearErr('ht1-err',ids);
+  if(bad([m,cp,t1,t2])) return showErr('ht1-err',ids);
+  showResult('ht1-result','ht1-val','ht1-formula',fmt(m*cp*(t2-t1)),'Q = '+m+' × '+cp+' × ('+(t2-t1)+')');
+}
+function calcLMTD(){
+  var ids=['lmtd-th1','lmtd-th2','lmtd-tc1','lmtd-tc2'];
+  var type=document.getElementById('lmtd-type').value;
+  var th1=g('lmtd-th1'),th2=g('lmtd-th2'),tc1=g('lmtd-tc1'),tc2=g('lmtd-tc2');
+  clearErr('lmtd-err',ids);
+  if(bad([th1,th2,tc1,tc2])) return showErr('lmtd-err',ids);
+  var dt1=type==='counter'?th1-tc2:th1-tc1;
+  var dt2=type==='counter'?th2-tc1:th2-tc2;
+  if(dt1<=0||dt2<=0) return showErr('lmtd-err',ids);
+  var lmtd=Math.abs(dt1-dt2)<1e-9?dt1:(dt1-dt2)/Math.log(dt1/dt2);
+  showResult('lmtd-result','lmtd-val','lmtd-formula',lmtd.toFixed(4),'ΔTlm = ('+dt1.toFixed(3)+' − '+dt2.toFixed(3)+') / ln('+dt1.toFixed(3)+'/'+dt2.toFixed(3)+')');
+}
+function calcHXArea(){
+  var ids=['hx-q','hx-u','hx-lmtd'];
+  var q=g('hx-q'),u=g('hx-u'),lmtd=g('hx-lmtd');
+  clearErr('hx-err',ids);
+  if(bad([q,u,lmtd])||u===0||lmtd===0) return showErr('hx-err',ids);
+  showResult('hx-result','hx-val','hx-formula',fmt(q/(u*lmtd)),'A = '+q+' / ('+u+' × '+lmtd+')');
+}
+function calcFourier(){
+  var ids=['fc-k','fc-a','fc-dt','fc-l'];
+  var k=g('fc-k'),a=g('fc-a'),dt=g('fc-dt'),l=g('fc-l');
+  clearErr('fc-err',ids);
+  if(bad([k,a,dt,l])||l===0) return showErr('fc-err',ids);
+  showResult('fc-result','fc-val','fc-formula',fmt(k*a*dt/l),'q = '+k+' × '+a+' × '+dt+' / '+l);
+}
+function calcConvection(){
+  var ids=['conv-h','conv-a','conv-ts','conv-tinf'];
+  var h=g('conv-h'),a=g('conv-a'),ts=g('conv-ts'),tinf=g('conv-tinf');
+  clearErr('conv-err',ids);
+  if(bad([h,a,ts,tinf])) return showErr('conv-err',ids);
+  showResult('conv-result','conv-val','conv-formula',fmt(h*a*(ts-tinf)),'q = '+h+' × '+a+' × ('+(ts-tinf)+')');
+}
+function calcNusselt(){
+  var ids=['nu-nu','nu-k','nu-lc'];
+  var nu=g('nu-nu'),k=g('nu-k'),lc=g('nu-lc');
+  clearErr('nu-err',ids);
+  if(bad([nu,k,lc])||lc===0) return showErr('nu-err',ids);
+  showResult('nu-result','nu-val','nu-formula',fmt(nu*k/lc),'h = '+nu+' × '+k+' / '+lc);
+}
+function calcMassBalance(){
+  var ids=['mb-in','mb-out'];
+  var inp=g('mb-in'),out=g('mb-out');
+  clearErr('mb-err',ids);
+  if(bad([inp,out])) return showErr('mb-err',ids);
+  showResult('mb-result','mb-val','mb-formula',fmt(inp-out),'Accumulation = '+inp+' − '+out);
+}
+function calcMixing(){
+  var ids=['mix-f1','mix-c1','mix-f2','mix-c2'];
+  var f1=g('mix-f1'),c1=g('mix-c1'),f2=g('mix-f2'),c2=g('mix-c2');
+  clearErr('mix-err',ids);
+  if(bad([f1,c1,f2,c2])||f1+f2===0) return showErr('mix-err',ids);
+  showResult('mix-result','mix-val','mix-formula',fmt((f1*c1+f2*c2)/(f1+f2)),'Cout = ('+f1+'×'+c1+' + '+f2+'×'+c2+') / ('+f1+'+'+f2+')');
+}
+function calcEnergyBalance(){
+  var ids=['eb-m','eb-cp','eb-dt'];
+  var m=g('eb-m'),cp=g('eb-cp'),dt=g('eb-dt');
+  clearErr('eb-err',ids);
+  if(bad([m,cp,dt])) return showErr('eb-err',ids);
+  showResult('eb-result','eb-val','eb-formula',fmt(m*cp*dt),'Q = '+m+' × '+cp+' × '+dt);
+}
+function calcReynolds(){
+  var ids=['re-rho','re-v','re-d','re-mu'];
+  var rho=g('re-rho'),v=g('re-v'),d=g('re-d'),mu=g('re-mu');
+  clearErr('re-err',ids);
+  if(bad([rho,v,d,mu])||mu===0) return showErr('re-err',ids);
+  var re=rho*v*d/mu;
+  var regime=' — laminar';
+  if(re>=2300&&re<=4000) regime=' — transitional';
+  if(re>4000) regime=' — turbulent';
+  document.getElementById('re-regime').textContent=regime;
+  showResult('re-result','re-val','re-formula',Math.round(re).toLocaleString(),'Re = '+rho+' × '+v+' × '+d+' / '+mu);
+}
+function calcPressureDrop(){
+  var ids=['dp-f','dp-l','dp-d','dp-rho','dp-v'];
+  var f=g('dp-f'),l=g('dp-l'),d=g('dp-d'),rho=g('dp-rho'),v=g('dp-v');
+  clearErr('dp-err',ids);
+  if(bad([f,l,d,rho,v])||d===0) return showErr('dp-err',ids);
+  showResult('dp-result','dp-val','dp-formula',fmt(f*(l/d)*(rho*v*v/2)),'ΔP = '+f+' × ('+l+'/'+d+') × ('+rho+' × '+v+'² / 2)');
+}
+function calcFrictionFactor(){
+  var ids=['ff-re','ff-eps','ff-d'];
+  var re=g('ff-re'),eps=g('ff-eps'),d=g('ff-d');
+  clearErr('ff-err',ids);
+  if(bad([re,eps,d])||d===0) return showErr('ff-err',ids);
+  var fd;
+  if(re<2300){
+    fd=64/re;
+    showResult('ff-result','ff-val','ff-formula',fd.toFixed(5),'Laminar: fD = 64/Re = 64/'+Math.round(re));
+  } else {
+    var arg=(eps/d)/3.7 + 5.74/Math.pow(re,0.9);
+    fd=0.25/Math.pow(Math.log10(arg),2);
+    showResult('ff-result','ff-val','ff-formula',fd.toFixed(5),'Swamee-Jain: fD = 0.25/[log10(ε/D/3.7 + 5.74/Re⁰·⁹)]²');
   }
-  function calcLMTD(){
-    var type=document.getElementById('lmtd-type').value;
-    var th1=getNumber('lmtd-th1'),th2=getNumber('lmtd-th2'),tc1=getNumber('lmtd-tc1'),tc2=getNumber('lmtd-tc2');
-    if(invalid([th1,th2,tc1,tc2]))return showError();
-    var dt1=type==='counter'?th1-tc2:th1-tc1;
-    var dt2=type==='counter'?th2-tc1:th2-tc2;
-    if(dt1<=0||dt2<=0)return showError('Temperature differences must be positive.');
-    var lmtd=Math.abs(dt1-dt2)<1e-9?dt1:(dt1-dt2)/Math.log(dt1/dt2);
-    showResult('lmtd-result','lmtd-val','lmtd-formula',lmtd.toFixed(3),'ΔTlm = ('+dt1.toFixed(2)+' − '+dt2.toFixed(2)+') / ln('+dt1.toFixed(2)+'/'+dt2.toFixed(2)+')');
-  }
-  function calcHXArea(){
-    var q=getNumber('hx-q'),u=getNumber('hx-u'),lmtd=getNumber('hx-lmtd');
-    if(invalid([q,u,lmtd])||u===0||lmtd===0)return showError();
-    showResult('hx-result','hx-val','hx-formula',(q/(u*lmtd)).toFixed(4),'A = '+q+' / ('+u+' × '+lmtd+')');
-  }
-  function calcFourier(){
-    var k=getNumber('fc-k'),a=getNumber('fc-a'),dt=getNumber('fc-dt'),l=getNumber('fc-l');
-    if(invalid([k,a,dt,l])||l===0)return showError();
-    showResult('fc-result','fc-val','fc-formula',(k*a*dt/l).toFixed(3),'q = '+k+' × '+a+' × '+dt+' / '+l);
-  }
-  function calcMassBalance(){
-    var inp=getNumber('mb-in'),out=getNumber('mb-out');
-    if(invalid([inp,out]))return showError();
-    showResult('mb-result','mb-val','mb-formula',(inp-out).toFixed(4),'Accumulation = '+inp+' − '+out);
-  }
-  function calcMixing(){
-    var f1=getNumber('mix-f1'),c1=getNumber('mix-c1'),f2=getNumber('mix-f2'),c2=getNumber('mix-c2');
-    if(invalid([f1,c1,f2,c2])||f1+f2===0)return showError();
-    showResult('mix-result','mix-val','mix-formula',((f1*c1+f2*c2)/(f1+f2)).toFixed(5),'Cout = ('+f1+'×'+c1+' + '+f2+'×'+c2+') / ('+f1+'+'+f2+')');
-  }
-  function calcEnergyBalance(){
-    var m=getNumber('eb-m'),cp=getNumber('eb-cp'),dt=getNumber('eb-dt');
-    if(invalid([m,cp,dt]))return showError();
-    showResult('eb-result','eb-val','eb-formula',(m*cp*dt).toExponential(3),'Q = '+m+' × '+cp+' × '+dt);
-  }
-  function calcReynolds(){
-    var rho=getNumber('re-rho'),v=getNumber('re-v'),d=getNumber('re-d'),mu=getNumber('re-mu');
-    if(invalid([rho,v,d,mu])||mu===0)return showError();
-    var re=rho*v*d/mu;
-    var regime=' transitional';
-    if(re<2300)regime=' laminar';
-    if(re>4000)regime=' turbulent';
-    document.getElementById('re-regime').textContent=regime;
-    showResult('re-result','re-val','re-formula',re.toFixed(0),'Re = '+rho+' × '+v+' × '+d+' / '+mu);
-  }
-  function calcPressureDrop(){
-    var f=getNumber('dp-f'),l=getNumber('dp-l'),d=getNumber('dp-d'),rho=getNumber('dp-rho'),v=getNumber('dp-v');
-    if(invalid([f,l,d,rho,v])||d===0)return showError();
-    showResult('dp-result','dp-val','dp-formula',(f*(l/d)*(rho*v*v/2)).toFixed(2),'ΔP = '+f+' × ('+l+'/'+d+') × ('+rho+' × '+v+'² / 2)');
-  }
-  function calcIdealGas(){
-    var n=getNumber('ig-n'),t=getNumber('ig-t'),v=getNumber('ig-v');
-    if(invalid([n,t,v])||v===0)return showError();
-    showResult('ig-result','ig-val','ig-formula',(n*8.314*t/v).toExponential(3),'P = '+n+' × 8.314 × '+t+' / '+v);
-  }
-  function calcConversion(){
-    var f0=getNumber('conv-f0'),f=getNumber('conv-f');
-    if(invalid([f0,f])||f0===0)return showError();
-    showResult('rxconv-result','rxconv-val','rxconv-formula',((f0-f)/f0*100).toFixed(2),'X = ('+f0+' − '+f+') / '+f0+' × 100%');
-  }
-  function calcArrhenius(){
-    var k1=getNumber('arr-k1'),ea=getNumber('arr-ea'),t1=getNumber('arr-t1'),t2=getNumber('arr-t2');
-    if(invalid([k1,ea,t1,t2])||t1===0||t2===0)return showError();
-    var k2=k1*Math.exp((-ea/8.314)*(1/t2-1/t1));
-    showResult('arr-result','arr-val','arr-formula',k2.toExponential(4),'k₂ = '+k1+' × exp[(-'+ea+'/8.314) × (1/'+t2+' − 1/'+t1+')]');
-  }
+}
+function calcIdealGas(){
+  var ids=['ig-n','ig-t','ig-v'];
+  var n=g('ig-n'),t=g('ig-t'),v=g('ig-v');
+  clearErr('ig-err',ids);
+  if(bad([n,t,v])||v===0) return showErr('ig-err',ids);
+  showResult('ig-result','ig-val','ig-formula',fmt(n*8.314*t/v),'P = '+n+' × 8.314 × '+t+' / '+v);
+}
+function calcAntoine(){
+  var ids=['ant-a','ant-b','ant-c','ant-t'];
+  var a=g('ant-a'),b=g('ant-b'),c=g('ant-c'),t=g('ant-t');
+  clearErr('ant-err',ids);
+  if(bad([a,b,c,t])) return showErr('ant-err',ids);
+  var logP=a - b/(c+t);
+  var psat=Math.pow(10,logP);
+  showResult('ant-result','ant-val','ant-formula',fmt(psat),'log10(P) = '+a+' − '+b+' / ('+c+' + '+t+') = '+logP.toFixed(4));
+}
+function calcConversion(){
+  var ids=['conv-f0','conv-f'];
+  var f0=g('conv-f0'),f=g('conv-f');
+  clearErr('rxconv-err',ids);
+  if(bad([f0,f])||f0===0) return showErr('rxconv-err',ids);
+  showResult('rxconv-result','rxconv-val','rxconv-formula',((f0-f)/f0*100).toFixed(3),'X = ('+f0+' − '+f+') / '+f0+' × 100%');
+}
+function calcArrhenius(){
+  var ids=['arr-k1','arr-ea','arr-t1','arr-t2'];
+  var k1=g('arr-k1'),ea=g('arr-ea'),t1=g('arr-t1'),t2=g('arr-t2');
+  clearErr('arr-err',ids);
+  if(bad([k1,ea,t1,t2])||t1===0||t2===0) return showErr('arr-err',ids);
+  var k2=k1*Math.exp((-ea/8.314)*(1/t2-1/t1));
+  showResult('arr-result','arr-val','arr-formula',fmt(k2),'k₂ = '+k1+' × exp[(-'+ea+'/8.314) × (1/'+t2+' − 1/'+t1+')]');
+}
+function calcCSTR(){
+  var ids=['cstr-fa0','cstr-x','cstr-ra'];
+  var fa0=g('cstr-fa0'),x=g('cstr-x'),ra=g('cstr-ra');
+  clearErr('cstr-err',ids);
+  if(bad([fa0,x,ra])||ra===0||x<0||x>1) return showErr('cstr-err',ids);
+  showResult('cstr-result','cstr-val','cstr-formula',fmt(fa0*x/ra),'V = '+fa0+' × '+x+' / '+ra);
+}
+function calcPFR(){
+  var ids=['pfr-fa0','pfr-k','pfr-ca0','pfr-x'];
+  var fa0=g('pfr-fa0'),k=g('pfr-k'),ca0=g('pfr-ca0'),x=g('pfr-x');
+  clearErr('pfr-err',ids);
+  if(bad([fa0,k,ca0,x])||k===0||ca0===0||x<=0||x>=1) return showErr('pfr-err',ids);
+  var v=(fa0/(k*ca0))*Math.log(1/(1-x));
+  showResult('pfr-result','pfr-val','pfr-formula',fmt(v),'V = ('+fa0+' / ('+k+' × '+ca0+')) × ln(1/(1−'+x+'))');
+}
+function calcFick(){
+  var ids=['fick-d','fick-ca1','fick-ca2','fick-dz'];
+  var d=g('fick-d'),ca1=g('fick-ca1'),ca2=g('fick-ca2'),dz=g('fick-dz');
+  clearErr('fick-err',ids);
+  if(bad([d,ca1,ca2,dz])||dz===0) return showErr('fick-err',ids);
+  showResult('fick-result','fick-val','fick-formula',fmt(d*(ca1-ca2)/dz),'JA = '+d+' × ('+ca1+' − '+ca2+') / '+dz);
+}
+function calcConvMT(){
+  var ids=['kc-kc','kc-cas','kc-cainf'];
+  var kc=g('kc-kc'),cas=g('kc-cas'),cainf=g('kc-cainf');
+  clearErr('kc-err',ids);
+  if(bad([kc,cas,cainf])) return showErr('kc-err',ids);
+  showResult('kc-result','kc-val','kc-formula',fmt(kc*(cas-cainf)),'NA = '+kc+' × ('+cas+' − '+cainf+')');
+}
+function calcSherwood(){
+  var ids=['sh-sh','sh-dab','sh-lc'];
+  var sh=g('sh-sh'),dab=g('sh-dab'),lc=g('sh-lc');
+  clearErr('sh-err',ids);
+  if(bad([sh,dab,lc])||lc===0) return showErr('sh-err',ids);
+  showResult('sh-result','sh-val','sh-formula',fmt(sh*dab/lc),'kc = '+sh+' × '+dab+' / '+lc);
+}
+function calcSchmidt(){
+  var ids=['sc-mu','sc-rho','sc-dab'];
+  var mu=g('sc-mu'),rho=g('sc-rho'),dab=g('sc-dab');
+  clearErr('sc-err',ids);
+  if(bad([mu,rho,dab])||rho===0||dab===0) return showErr('sc-err',ids);
+  var sc=mu/(rho*dab);
+  var note='';
+  if(sc<0.1) note='(Sc ≪ 1 — liquid metal regime)';
+  else if(sc<2) note='(Sc ≈ 1 — gas)';
+  else note='(Sc ≫ 1 — liquid)';
+  document.getElementById('sc-note').textContent=note;
+  showResult('sc-result','sc-val','sc-formula',fmt(sc),'Sc = '+mu+' / ('+rho+' × '+dab+')');
+}
+function setUC(id, val){ document.getElementById(id).textContent = isNaN(val) ? '—' : fmt(val); }
+function ucTemp(f){ var c=parseFloat(document.getElementById('uc-tc').value); setUC('uc-tf', c*9/5+32); }
+function ucTemp2(f){ var c=parseFloat(document.getElementById('uc-tc2').value); setUC('uc-tk', c+273.15); }
+function ucTemp3(f){ var fahr=parseFloat(document.getElementById('uc-tf2').value); setUC('uc-tc3', (fahr-32)*5/9); }
+function ucPress(f){ var p=parseFloat(document.getElementById('uc-pa').value); setUC('uc-atm', p/101325); }
+function ucPress2(f){ var p=parseFloat(document.getElementById('uc-pa2').value); setUC('uc-bar', p/1e5); }
+function ucPress3(f){ var p=parseFloat(document.getElementById('uc-pa3').value); setUC('uc-psi', p/6894.757); }
+function ucPress4(f){ var p=parseFloat(document.getElementById('uc-pa4').value); setUC('uc-mmhg', p/133.322); }
+function ucFlow(f){ var q=parseFloat(document.getElementById('uc-m3s').value); setUC('uc-lpm', q*1000*60); }
+function ucFlow2(f){ var q=parseFloat(document.getElementById('uc-m3s2').value); setUC('uc-gpm', q*264.172*60); }
+function ucMass(f){ var m=parseFloat(document.getElementById('uc-kg').value); setUC('uc-lb', m*2.20462); }
+function ucDens(f){ var d=parseFloat(document.getElementById('uc-kgm3').value); setUC('uc-gcm3', d/1000); }
+function ucEnergy(f){ var j=parseFloat(document.getElementById('uc-j').value); setUC('uc-kj', j/1000); }
+function ucEnergy2(f){ var j=parseFloat(document.getElementById('uc-j2').value); setUC('uc-btu', j/1055.06); }
+function ucPower(f){ var w=parseFloat(document.getElementById('uc-w').value); setUC('uc-btuh', w*3.41214); }
+function ucVisc(f){ var p=parseFloat(document.getElementById('uc-pas').value); setUC('uc-cp', p*1000); }
+function ucVisc2(f){ var p=parseFloat(document.getElementById('uc-pas2').value); setUC('uc-lbfts', p*0.671969); }
 </script>
 </body>
 </html>
